@@ -36,7 +36,7 @@ return view.extend({
 		return Promise.all([
 			L.resolveDefault(callStatus(), {}),
 			L.resolveDefault(callSessionAccess('access-group', 'luci-app-mwan4', 'read'), false),
-			L.resolveDefault(callSessionAccess('access-group', 'luci-app-mwan4-diagnostics', 'read'), false)
+			Promise.resolve(false)
 		]);
 	},
 

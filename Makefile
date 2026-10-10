@@ -4,7 +4,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=luci-app-mwan4
 PKG_VERSION:=1.0.0
-PKG_RELEASE:=9
+PKG_RELEASE:=10
 PKG_LICENSE:=AGPL-3.0-or-later
 
 LUCI_TITLE:=LuCI support for the MWAN4 MultiWAN Manager
@@ -13,6 +13,6 @@ LUCI_DESCRIPTION:=Simple, full-featured LuCI interface for mwan4 status and conf
 LUCI_MAINTAINER:=Braulio Bhavamitra <braulio@brauliobo.org>
 LUCI_MINIFY_JS:=0
 
-include ../../luci.mk
+include $(TOPDIR)/feeds/luci/luci.mk
 
 # call BuildPackage - OpenWrt buildroot signature

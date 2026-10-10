@@ -17,13 +17,6 @@ const callStatus = rpc.declare({
 	expect: { }
 });
 
-const callValidate = rpc.declare({
-	object: 'mwan4',
-	method: 'validate',
-	params: [ 'section' ],
-	expect: { }
-});
-
 const callSessionAccess = rpc.declare({
 	object: 'session',
 	method: 'access',
@@ -144,31 +137,6 @@ function closeModal() {
 
 	if (target && document.documentElement.contains(target))
 		window.setTimeout(function() { target.focus(); }, 0);
-}
-
-function validationProblemText(result) {
-	let errors = result && result.errors;
-
-	if (!Array.isArray(errors))
-		errors = errors ? [ errors ] : [];
-
-	if (!errors.length)
-		return null;
-
-	return errors.map(function(error) {
-		return error.message || error.code || _('Configuration validation failed');
-	}).join('; ');
-}
-
-function validateBeforeApply() {
-	return L.resolveDefault(callValidate('config'), {}).then(function(result) {
-		let message = validationProblemText(result);
-
-		if (message)
-			throw new Error(message);
-
-		return result;
-	});
 }
 
 function networkNames() {
@@ -363,7 +331,7 @@ function previewModalActions(changeFn, removeFn) {
 
 function commitPendingChange(change) {
 	closeModal();
-	return Promise.resolve(change.apply()).then(validateBeforeApply).then(saveApplyRestart).catch(function(e) {
+	return Promise.resolve(change.apply()).then(saveApplyRestart).catch(function(e) {
 		ui.addNotification(null, E('p', [ _('Change was not applied: %s').format(e.message || e) ]), 'danger');
 		throw e;
 	});
@@ -1599,8 +1567,8 @@ function renderWanActions(name) {
 
 	if (hasOperatorAccess) {
 		actions.splice(1, 0,
-			E('button', { class: 'btn cbi-button cbi-button-action mwan4-compact-button', 'aria-label': _('Bring WAN link %s up').format(name), 'aria-busy': 'false', click: function(ev) { return runMwan4([ 'ifup', name ], eventButton(ev)); } }, [ _('Up') ]),
-			E('button', { class: 'btn cbi-button cbi-button-reset mwan4-compact-button', 'aria-label': _('Take WAN link %s down').format(name), 'aria-busy': 'false', click: function(ev) { return runMwan4([ 'ifdown', name ], eventButton(ev)); } }, [ _('Down') ])
+			E('button', { class: 'btn cbi-button cbi-button-action mwan4-compact-button', 'aria-label': _('Enable WAN link %s in routing').format(name), 'aria-busy': 'false', click: function(ev) { return runMwan4([ 'ifup', name ], eventButton(ev)); } }, [ _('Up') ]),
+			E('button', { class: 'btn cbi-button cbi-button-reset mwan4-compact-button', 'aria-label': _('Remove WAN link %s from routing').format(name), 'aria-busy': 'false', click: function(ev) { return runMwan4([ 'ifdown', name ], eventButton(ev)); } }, [ _('Down') ])
 		);
 	}
 
@@ -1899,9 +1867,9 @@ return view.extend({
 			uci.load('network'),
 			L.resolveDefault(callStatus(), {}),
 			L.resolveDefault(callSessionAccess('access-group', 'luci-app-mwan4-operator', 'write'), false),
-			L.resolveDefault(callSessionAccess('access-group', 'luci-app-mwan4-advanced', 'write'), false),
-			L.resolveDefault(callSessionAccess('access-group', 'luci-app-mwan4-diagnostics', 'read'), false),
-			L.resolveDefault(callStatus('counters'), {}),
+			Promise.resolve(false),
+			Promise.resolve(false),
+			Promise.resolve({ supported: false }),
 			L.resolveDefault(fs.stat('/usr/bin/httping'), {}),
 			L.resolveDefault(fs.stat('/usr/bin/nping'), {}),
 			L.resolveDefault(fs.stat('/usr/bin/arping'), {}),
@@ -1912,8 +1880,8 @@ return view.extend({
 	render: function(data) {
 		let status = data[2] || {};
 		hasOperatorAccess = !!data[3];
-		hasAdvancedAccess = !!data[4];
-		hasDiagnosticsAccess = !!data[5];
+		hasAdvancedAccess = false; // No advanced_control API in mossdef backend.
+		hasDiagnosticsAccess = false; // No diagnostics API in mossdef backend.
 		let counters = data[6] || {};
 		probeHelpers = {
 			httping:  helperAvailable(data[7]),
@@ -1931,7 +1899,7 @@ return view.extend({
 
 			return Promise.all([
 				L.resolveDefault(callStatus(), {}),
-				L.resolveDefault(callStatus('counters'), {})
+				Promise.resolve({ supported: false })
 			]).then(function(results) {
 				let result = results[0] || {};
 				let counterResult = results[1] || {};
