@@ -23,6 +23,16 @@ function statusClass(status, up) {
 	return 'mwan4-warning';
 }
 
+function statusLabel(value) {
+	const labels = {
+		online: _('online'), offline: _('offline'), unknown: _('unknown'),
+		active: _('active'), paused: _('paused'), disabled: _('disabled'),
+		up: _('Probe succeeded'), down: _('Probe failed'), skipped: _('skipped'),
+		pending: _('pending'), configured: _('configured')
+	};
+	return labels[value] || value;
+}
+
 function formatDisplayValue(value, fallback) {
 	if (value == null || value === '')
 		return fallback || _('Not available');
@@ -53,6 +63,16 @@ function formatDisplayValue(value, fallback) {
 	}
 
 	return String(value);
+}
+
+function formatBytes(bytes) {
+	let units = [ 'B', 'KB', 'MB', 'GB', 'TB' ];
+	let unit = 0;
+
+	for (; bytes >= 1024 && unit < units.length - 1; unit++)
+		bytes /= 1024;
+
+	return '%s %s'.format(unit ? bytes.toFixed(1) : bytes, units[unit]);
 }
 
 function renderPill(text, cls) {
@@ -159,6 +179,7 @@ function rpcErrorMessage(result, fallback) {
 
 return baseclass.extend({
 	addStylesheet:         addStylesheet,
+	formatBytes:           formatBytes,
 	formatDisplayValue:    formatDisplayValue,
 	renderAclNotice:       renderAclNotice,
 	renderNextSteps:       renderNextSteps,
@@ -166,5 +187,6 @@ return baseclass.extend({
 	renderRuntimeWarnings: renderRuntimeWarnings,
 	rpcErrorMessage:       rpcErrorMessage,
 	setBusy:               setBusy,
-	statusClass:           statusClass
+	statusClass:           statusClass,
+	statusLabel:           statusLabel
 });
