@@ -1,5 +1,5 @@
 msgid ""
-msgstr "Content-Type: text/plain; charset=UTF-8\nProject-Id-Version: luci-app-mwan4\nPO-Revision-Date: 2026-10-11 23:50+0800\nLast-Translator: gbosek\nLanguage-Team: Simplified Chinese\nLanguage: zh_Hans\nMIME-Version: 1.0\nContent-Transfer-Encoding: 8bit\nPlural-Forms: nplurals=1; plural=0;\n"
+msgstr "Content-Type: text/plain; charset=UTF-8\nProject-Id-Version: luci-app-mwan4\nPO-Revision-Date: 2026-10-28 15:00+0800\nLast-Translator: gbosek\nLanguage-Team: Simplified Chinese\nLanguage: zh_Hans\nMIME-Version: 1.0\nContent-Transfer-Encoding: 8bit\nPlural-Forms: nplurals=1; plural=0;\n"
 
 msgid " / netifd down"
 msgstr " / 网络接口未连接"
@@ -3591,3 +3591,423 @@ msgstr "策略路由已停止"
 
 msgid "Stopped"
 msgstr "已停止"
+
+msgid "Prefer %s, fall back to others"
+msgstr "优先使用 %s，故障时切换其他线路"
+
+msgid "Only %s, never leak"
+msgstr "仅使用 %s，不切换到其他线路"
+
+msgid "Interface %s"
+msgstr "接口 %s"
+
+msgid "All devices"
+msgstr "所有设备"
+
+msgid "DSCP %s"
+msgstr "DSCP %s"
+
+msgid "Includes router traffic"
+msgstr "包含路由器本机流量"
+
+msgid "Give the rule a name."
+msgstr "请填写规则名称。"
+
+msgid "Not a domain name or IP address: %s"
+msgstr "不是有效的域名或 IP 地址：%s"
+
+msgid "MAC addresses belong in Who, not in What."
+msgstr "MAC 地址应填写在“来源设备”中，而不是“匹配流量”中。"
+
+msgid "Devices must be IP addresses, CIDR ranges, or MAC addresses: %s"
+msgstr "设备需填写 IP 地址、CIDR 网段或 MAC 地址：%s"
+
+msgid "Pick or enter at least one device."
+msgstr "请至少选择或填写一台设备。"
+
+msgid "Choose a network interface."
+msgstr "请选择网络接口。"
+
+msgid "Use a DSCP value from 1 to 63."
+msgstr "DSCP 值必须在 1–63 之间。"
+
+msgid "The protocol and addresses do not share an IP family (IPv4 or IPv6)."
+msgstr "协议与地址的 IP 协议族不一致（IPv4 或 IPv6）。"
+
+msgid "Add at least one thing to match, otherwise the rule would catch all traffic."
+msgstr "请至少设置一项匹配条件，否则此规则将匹配所有流量。"
+
+msgid "What"
+msgstr "匹配流量"
+
+msgid "Protocol and ports"
+msgstr "协议和端口"
+
+msgid "Who"
+msgstr "来源设备"
+
+msgid "Via"
+msgstr "出口线路"
+
+msgid "This will update the routing rule before it is saved and applied."
+msgstr "保存并应用后，将更新此分流规则。"
+
+msgid "This will add a routing rule before it is saved and applied."
+msgstr "保存并应用后，将添加此分流规则。"
+
+msgid "This will remove the routing rule after you apply the pending change."
+msgstr "应用待处理更改后，将删除此分流规则。"
+
+msgid "1. What traffic?"
+msgstr "1. 匹配哪些流量？"
+
+msgid "Domains and IP addresses are detected automatically, so list them together."
+msgstr "自动识别域名和 IP 地址，可混合填写。"
+
+msgid "Domains and addresses"
+msgstr "域名和地址"
+
+msgid "One entry per line. A domain also matches its subdomains. Leave empty to match every destination."
+msgstr "每行一项。域名也匹配其子域名；留空则匹配所有目标。"
+
+msgid "No DHCP leases or ARP neighbors were found; enter addresses manually."
+msgstr "未发现 DHCP 租约或 ARP 邻居，请手动填写地址。"
+
+msgid "Add a known device"
+msgstr "添加已发现的设备"
+
+msgid "Choose a device"
+msgstr "选择设备"
+
+msgid "2. Who?"
+msgstr "2. 来自哪些设备？"
+
+msgid "Apply the rule to everyone, to specific LAN devices, or to a whole network interface."
+msgstr "可应用到所有设备、指定局域网设备，或整个网络接口。"
+
+msgid "Applies to"
+msgstr "应用范围"
+
+msgid "Selected devices"
+msgstr "指定设备"
+
+msgid "A network interface"
+msgstr "指定网络接口"
+
+msgid "Devices"
+msgstr "设备"
+
+msgid "One MAC address, IP address, or CIDR range per line."
+msgstr "每行填写一个 MAC 地址、IP 地址或 CIDR 网段。"
+
+msgid "Existing strategies"
+msgstr "已有策略"
+
+msgid "Quick presets"
+msgstr "快捷策略"
+
+msgid "3. Via which WAN links?"
+msgstr "3. 使用哪些 WAN 线路？"
+
+msgid "Pick a saved strategy or a one-click preset; presets create the strategy for you."
+msgstr "选择已有策略或快捷策略；快捷策略会自动创建所需配置。"
+
+msgid "Send matching traffic via"
+msgstr "匹配流量的出口"
+
+msgid "Prefer keeps the other WAN links as backups. Only fails closed instead of leaking traffic to another WAN link."
+msgstr "“优先使用”会保留其他 WAN 作为备用；“仅使用”在故障时阻断流量，不切换到其他 WAN。"
+
+msgid "Optional DSCP, source port, router traffic, sticky-session, and logging fields stay visible so the rule is reviewable at a glance."
+msgstr "可在此核对 DSCP、源端口、本机流量、会话保持和日志等可选条件。"
+
+msgid "DSCP value"
+msgstr "DSCP 值"
+
+msgid "Match packets marked with this DSCP class (1-63)."
+msgstr "匹配具有此 DSCP 标记的数据包（1–63）。"
+
+msgid "Also route traffic from this router"
+msgstr "同时对路由器本机流量分流"
+
+msgid "Routing rule: %s"
+msgstr "分流规则：%s"
+
+msgid "Add routing rule"
+msgstr "添加分流规则"
+
+msgid "Routing rule builder"
+msgstr "分流规则编辑器"
+
+msgid "New routing rule"
+msgstr "新建分流规则"
+
+msgid "Rules run from top to bottom: the first match decides which WAN links carry the traffic."
+msgstr "规则从上到下匹配，首次匹配的规则决定流量使用的 WAN 线路。"
+
+msgid "Rule name"
+msgstr "规则名称"
+
+msgid "Work VPN"
+msgstr "办公 VPN"
+
+msgid "A readable name; mwan4 derives its short internal name automatically."
+msgstr "填写易辨认的名称，MWAN4 会自动生成简短的内部名称。"
+
+msgid "These settings affect every strategy, path, generated default, and routing rule."
+msgstr "这些设置会影响所有策略、路径、自动生成的默认规则及分流规则。"
+
+msgid "Failover strategies, generated defaults, and routing rules may not be fully enforced until the runtime warning is cleared."
+msgstr "运行告警解除前，故障切换策略、默认规则及分流规则可能无法完全生效。"
+
+msgid "Inspect the offline WAN link, health check targets, and SLA thresholds before changing routing rules."
+msgstr "修改分流规则前，请先检查离线的 WAN、健康检测目标和 SLA 阈值。"
+
+msgid "Watch the WAN workspace, or add routing rules only for traffic that needs a special path."
+msgstr "可在 WAN 状态区观察线路，仅为需要指定出口的流量添加分流规则。"
+
+msgid "mwan4 has WAN links, routing defaults, optional routing rules, and clean runtime status."
+msgstr "MWAN4 的 WAN、默认路由及可选分流规则已配置，当前无运行告警。"
+
+msgid "Routing rules"
+msgstr "分流规则"
+
+msgid "%d including defaults"
+msgstr "共 %d 条（含默认规则）"
+
+msgid "Add rule"
+msgstr "添加规则"
+
+msgid "Work from left to right: add tracked WAN links, choose a routing mode, then add routing rules only for traffic that needs a special path."
+msgstr "依次添加带健康检测的 WAN、选择路由模式，再为需要指定出口的流量添加规则。"
+
+msgid "Add routing rules only if needed"
+msgstr "按需添加分流规则"
+
+msgid "ordered failover"
+msgstr "按顺序故障切换"
+
+msgid "balanced"
+msgstr "负载均衡"
+
+msgid ", fails closed"
+msgstr "，故障时阻断"
+
+msgid "%d bytes"
+msgstr "%d 字节"
+
+msgid "Move routing rule %s up"
+msgstr "上移分流规则 %s"
+
+msgid "Move routing rule %s down"
+msgstr "下移分流规则 %s"
+
+msgid "Order"
+msgstr "顺序"
+
+msgid "Drag to reorder"
+msgstr "拖动调整顺序"
+
+msgid "Enable routing rule %s"
+msgstr "启用分流规则 %s"
+
+msgid "Match"
+msgstr "匹配条件"
+
+msgid "Hits"
+msgstr "命中统计"
+
+msgid "Edit routing rule %s"
+msgstr "编辑分流规则 %s"
+
+msgid "Default routing always stays last"
+msgstr "默认路由规则始终位于末尾"
+
+msgid "Everything else"
+msgstr "其余所有流量"
+
+msgid "All traffic no rule above matched"
+msgstr "上方规则均未匹配的流量"
+
+msgid "No routing rules yet."
+msgstr "尚未添加分流规则。"
+
+msgid "All traffic follows the default routing below. Add a rule to send a site, a device, or a whole network through specific WAN links."
+msgstr "所有流量遵循下方默认路由；可添加规则，让指定网站、设备或整个网络使用指定 WAN。"
+
+msgid "Evaluated top to bottom"
+msgstr "从上到下匹配"
+
+msgid "Import routing rules from PBR"
+msgstr "从 PBR 导入分流规则"
+
+msgid "Import from PBR"
+msgstr "从 PBR 导入"
+
+msgid "Update"
+msgstr "更新"
+
+msgid "Import"
+msgstr "导入"
+
+msgid "Not everything can be imported"
+msgstr "部分内容无法导入"
+
+msgid "Dry-run preview"
+msgstr "模拟预览"
+
+msgid "Nothing is written until you confirm. PBR itself is not changed or stopped; rules keep the PBR order and go before the default routing."
+msgstr "确认前不会写入配置。PBR 本身不会被修改或停止；导入规则保留原顺序，并放在默认路由规则之前。"
+
+msgid "PBR policy"
+msgstr "PBR 策略"
+
+msgid "WAN links to create:"
+msgstr "将创建的 WAN："
+
+msgid "Strategies to create:"
+msgstr "将创建的策略："
+
+msgid "Import %d rule(s)"
+msgstr "导入 %d 条规则"
+
+msgid "PBR import failed"
+msgstr "PBR 导入失败"
+
+msgid "Imported %d PBR rule(s) into MultiWAN 4."
+msgstr "已将 %d 条 PBR 规则导入 MWAN4。"
+
+msgid "PBR import failed: %s"
+msgstr "PBR 导入失败：%s"
+
+msgid "Readable display name"
+msgstr "易辨认的显示名称"
+
+msgid "Shown in the overview; the section name stays a short internal identifier."
+msgstr "用于概览显示；配置节名称仍保留为简短的内部标识。"
+
+msgid "Optional CIDR or IP addresses to match as the traffic source."
+msgstr "可填写 CIDR 网段或 IP 地址，作为流量来源匹配条件。"
+
+msgid "Source MAC address"
+msgstr "源 MAC 地址"
+
+msgid "Optional device MAC addresses to match as the traffic source."
+msgstr "可填写设备 MAC 地址，作为流量来源匹配条件。"
+
+msgid "Destination domains"
+msgstr "目标域名"
+
+msgid "example.com"
+msgstr "example.com"
+
+msgid "Domains are resolved by dnsmasq into nft sets; subdomains match automatically."
+msgstr "域名经 dnsmasq 解析后填入 nft 集合，同时自动匹配子域名。"
+
+msgid "Include router traffic"
+msgstr "包含路由器本机流量"
+
+msgid "Also apply this rule to traffic originated by the router itself."
+msgstr "同时将此规则应用于路由器本机发起的流量。"
+
+msgid "IPv4: %d active / %d new, IPv6: %d active / %d new"
+msgstr "IPv4：%d 个活动连接 / %d 次新连接匹配，IPv6：%d 个活动连接 / %d 次新连接匹配"
+
+msgid "%dh %dm"
+msgstr "%d小时 %d分"
+
+msgid "%dm %ds"
+msgstr "%d分 %d秒"
+
+msgid "%ds"
+msgstr "%d秒"
+
+msgid "View connections of routing rule %s: %d active, %d new"
+msgstr "查看规则 %s 的连接：%d 个活动连接，%d 次新连接匹配"
+
+msgid "%d packets"
+msgstr "%d 个数据包"
+
+msgid "Via WAN"
+msgstr "出口 WAN"
+
+msgid "TTL"
+msgstr "剩余超时"
+
+msgid "Address, port, or rule"
+msgstr "地址、端口或规则"
+
+msgid "Search connections"
+msgstr "搜索连接"
+
+msgid "No connections match these filters."
+msgstr "没有符合筛选条件的连接。"
+
+msgid "Show more"
+msgstr "显示更多"
+
+msgid "unexpected response"
+msgstr "响应格式异常"
+
+msgid "%d active connection(s)"
+msgstr "%d 个活动连接"
+
+msgid "Showing the first %d of %d connections. Narrow the filters or show more."
+msgstr "当前显示 %d 个连接，共 %d 个。可缩小筛选范围或显示更多。"
+
+msgid "Connections are unavailable: %s"
+msgstr "无法获取连接：%s"
+
+msgid "Any rule"
+msgstr "所有规则"
+
+msgid "Any WAN"
+msgstr "所有 WAN"
+
+msgid "Any strategy"
+msgstr "所有策略"
+
+msgid "IPv4 and IPv6"
+msgstr "IPv4 和 IPv6"
+
+msgid "Search"
+msgstr "搜索"
+
+msgid "Connections"
+msgstr "连接"
+
+msgid "%d active, %d new since the ruleset was loaded"
+msgstr "%d 个活动连接，规则加载后 %d 次新连接匹配"
+
+msgid "No connections counted for this rule yet."
+msgstr "此规则暂无连接统计。"
+
+msgid "View connections"
+msgstr "查看连接"
+
+msgid "View all active connections"
+msgstr "查看全部活动连接"
+
+msgid "Active connections"
+msgstr "活动连接"
+
+msgid "Open the live connection list"
+msgstr "打开实时连接列表"
+
+msgid "View active connections of WAN link %s"
+msgstr "查看 WAN %s 的活动连接"
+
+msgid "View active connections of strategy %s"
+msgstr "查看策略 %s 的活动连接"
+
+msgid "%s: %d"
+msgstr "%s：%d"
+
+msgid "Rule ID"
+msgstr "规则 ID"
+
+msgid "Assigned automatically by mwan4 to count connections per rule; it never changes while the rule exists."
+msgstr "由 MWAN4 自动分配，用于按规则统计连接；规则存在期间不会改变。"
+
+msgid "Live conntrack entries attributed to mwan4 routing rules and WAN links. The list refreshes while this page is open."
+msgstr "显示归属于 MWAN4 分流规则及 WAN 的实时 conntrack 连接，打开本页时自动刷新。"

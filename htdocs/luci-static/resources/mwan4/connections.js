@@ -55,7 +55,11 @@ function ruleStats(name, status, counters) {
 function interfaceActive(name, status) {
 	let value = (((status || {}).interfaces || {})[name] || {}).active_connections;
 
-	return value == null ? null : Number(value.total);
+	if (value == null)
+		return null;
+	let total = typeof value == 'object' ? value.total : value;
+	let count = total == null ? NaN : Number(total);
+	return Number.isFinite(count) && count >= 0 ? count : null;
 }
 
 function strategyActive(name, status) {

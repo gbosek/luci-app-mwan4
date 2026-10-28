@@ -239,18 +239,30 @@ function reloadOverview() {
 }
 
 function saveApplyRestart() {
-	return withBusy(byId('mwan4-app'), function() { return uci.save()
-		.then(function() { return uci.apply(10); })
-		.then(function() { return hasOperatorAccess ? runMwan4([ 'restart' ]) : null; })
-		.then(function(result) {
-			if (hasOperatorAccess && result !== true)
-				throw new Error(_('Control request failed'));
-			ui.addNotification(null, E('p', [ hasOperatorAccess
-				? _('MultiWAN 4 settings applied and service restarted.')
-				: _('MultiWAN 4 settings applied. Service restart is hidden by this session ACL.') ]), hasOperatorAccess ? 'info' : 'warning');
-		})
-		.then(reloadOverview);
-	});
+ let wasRunning = false;
+ let restarted = false;
+ function running(status) {
+  let value = ((status || {}).diagnostics || {}).service_running;
+  if (typeof value != 'boolean') throw new Error(_('Cannot determine MultiWAN 4 service state.'));
+  return value;
+ }
+ return withBusy(byId('mwan4-app'), function() { return callStatus()
+  .then(function(status) { wasRunning = running(status); return uci.save(); })
+  .then(function() { return uci.apply(10); })
+  .then(function() { return callStatus(); })
+  .then(function(status) {
+   if (!wasRunning || !running(status) || !hasOperatorAccess) return;
+   return runMwan4([ 'restart' ]).then(function(ok) {
+    if (ok !== true) throw new Error(_('Control request failed'));
+    restarted = true;
+   });
+  })
+  .then(function() { return callStatus(); })
+  .then(function(status) {
+   ui.addNotification(null, E('p', [ restarted ? _('MultiWAN 4 settings applied and service restarted.')
+    : running(status) ? _('MultiWAN 4 settings applied.') : _('MultiWAN 4 settings applied. Service remains stopped.') ]), 'info');
+  }).then(reloadOverview);
+ });
 }
 
 function closeModal() {

@@ -36,6 +36,10 @@ assert.equal(connections.ruleStats('streaming', counters, {}).active.total, 3, '
 
 const status = { interfaces: { wan: { active_connections: { ipv4: 5, ipv6: 0, total: 5 } }, lte: {} }, strategy_status: { ipv4: { failover: { active_connections: 4 } }, ipv6: { failover: { active_connections: 1 } } } };
 assert.equal(connections.interfaceActive('wan', status), 5);
+assert.equal(connections.interfaceActive('wan', { interfaces: { wan: { active_connections: 9 } } }), 9, 'legacy scalar counts remain supported');
+assert.equal(connections.interfaceActive('wan', { interfaces: { wan: { active_connections: { total: 0 } } } }), 0, 'a measured zero remains zero');
+for (const value of [ {}, { total: 'not-a-count' }, { total: -1 }, -1 ])
+	assert.equal(connections.interfaceActive('wan', { interfaces: { wan: { active_connections: value } } }), null, 'missing or invalid counts never render as NaN or invented zero');
 assert.equal(connections.interfaceActive('lte', status), null, 'missing interface counts stay unknown instead of 0');
 assert.equal(connections.strategyActive('failover', status), 5, 'strategy counts sum both families');
 assert.equal(connections.strategyActive('missing', status), null);
