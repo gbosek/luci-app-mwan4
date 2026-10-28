@@ -120,7 +120,7 @@ function renderServiceActions() {
 		return null;
 
 	return E('div', { class: 'mwan4-service-controls' }, [
-		E('button', { class: 'btn cbi-button cbi-button-action', 'aria-label': _('Refresh MultiWAN 4 runtime'), 'aria-busy': 'false', click: function(ev) { return runMwan4([ 'restart' ], eventButton(ev)); } }, [ _('Refresh runtime') ]),
+		E('button', { class: 'btn cbi-button cbi-button-action', 'aria-label': _('Refresh MultiWAN 4 runtime'), 'aria-busy': 'false', click: function(ev) { return withButtonBusy(eventButton(ev), refreshRuntime).catch(function(e) { ui.addNotification(null, E('p', [ e.message || String(e) ]), 'danger'); }); } }, [ _('Refresh runtime') ]),
 		E('span', { class: 'mwan4-muted-line' }, [ _('Service') ]),
 		E('button', { class: 'btn cbi-button cbi-button-apply', 'aria-label': _('Start MultiWAN 4 service'), 'aria-busy': 'false', click: function(ev) { return runMwan4([ 'start' ], eventButton(ev)); } }, [ _('Start') ]),
 		E('button', { class: 'btn cbi-button cbi-button-reset', 'aria-label': _('Stop MultiWAN 4 service'), 'aria-busy': 'false', click: function(ev) { return runMwan4([ 'stop' ], eventButton(ev)); } }, [ _('Stop') ])
