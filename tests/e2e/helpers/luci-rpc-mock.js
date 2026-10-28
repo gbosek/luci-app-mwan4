@@ -3,7 +3,9 @@ const path = require('path');
 
 const overviewPath = path.resolve(__dirname, '../../../htdocs/luci-static/resources/view/mwan4/network/overview.js');
 const commonPath = path.resolve(__dirname, '../../../htdocs/luci-static/resources/mwan4/common.js');
+const rulesModulePath = path.resolve(__dirname, '../../../htdocs/luci-static/resources/mwan4/rules.js');
 const overviewModulePath = path.resolve(__dirname, '../../../htdocs/luci-static/resources/mwan4/overview.js');
+const connectionsModulePath = path.resolve(__dirname, '../../../htdocs/luci-static/resources/mwan4/connections.js');
 const diagnosticsModulePath = path.resolve(__dirname, '../../../htdocs/luci-static/resources/mwan4/diagnostics.js');
 const diagnosticsPath = path.resolve(__dirname, '../../../htdocs/luci-static/resources/view/mwan4/status/diagnostics.js');
 const statusPath = path.resolve(__dirname, '../../../htdocs/luci-static/resources/view/mwan4/status/overview.js');
@@ -43,8 +45,9 @@ function defaultUci() {
 				up: '5',
 				check_quality: '0'
 			},
-			{ '.type': 'route', '.name': 'route_wan_primary', interface: 'wan_primary' },
-			{ '.type': 'strategy', '.name': 'failover', route: [ 'route_wan_primary' ] },
+			{ '.type': 'route', '.name': 'route_wan_primary', interface: 'wan_primary', metric: '1' },
+			{ '.type': 'route', '.name': 'route_wan_backup', interface: 'wan_backup', metric: '2' },
+			{ '.type': 'strategy', '.name': 'failover', use_route: [ 'route_wan_primary', 'route_wan_backup' ], last_resort: 'unreachable' },
 			{ '.type': 'rule', '.name': 'default_rule_v4', '.index': 0, family: [ 'ipv4' ], dest_ip: '0.0.0.0/0', use_strategy: 'failover' },
 			{ '.type': 'rule', '.name': 'default_rule_v6', '.index': 1, family: [ 'ipv6' ], dest_ip: '::/0', use_strategy: 'failover' },
 			{ '.type': 'globals', '.name': 'globals', mmx_mask: '0x3F00', source_routing: '0', loglevel: 'notice' }
@@ -56,10 +59,23 @@ function defaultUci() {
 	};
 }
 
+function defaultConnections() {
+	return {
+		ok:         true,
+		accounting: true,
+		items:      [
+			{ family: 'ipv4', proto: 'tcp', src: '192.168.1.30', sport: 51000, dst: '203.0.113.10', dport: 443, state: 'ESTABLISHED', timeout: 7200, packets: 120, bytes: 150000, rule: 'streaming', rule_label: 'Streaming', interface: 'wan_primary', strategy: 'failover' },
+			{ family: 'ipv4', proto: 'udp', src: '192.168.1.20', sport: 40000, dst: '198.51.100.7', dport: 53, state: 'UNREPLIED', timeout: 25, packets: 2, bytes: 180, rule: 'backups', rule_label: 'backups', interface: 'wan_backup', strategy: '' },
+			{ family: 'ipv6', proto: 'tcp', src: '2001:db8::30', sport: 52000, dst: '2001:db8:ffff::10', dport: 443, state: 'ESTABLISHED', timeout: 90, packets: 40, bytes: 8000, rule: '', rule_label: '', interface: 'wan_primary', strategy: 'failover' }
+		]
+	};
+}
+
 function defaultStatus() {
 	return {
 		interfaces: {
 			wan_primary: {
+				active_connections: { ipv4: 5, ipv6: 0, total: 5 },
 				status: 'online',
 				up: true,
 				tracking: 'tracking',
@@ -79,6 +95,7 @@ function defaultStatus() {
 				]
 			},
 			wan_backup: {
+				active_connections: { ipv4: 2, ipv6: 0, total: 2 },
 				status: 'online',
 				up: true,
 				tracking: 'tracking',
@@ -100,6 +117,10 @@ function defaultStatus() {
 			ipv4: { failover: [ { interface: 'wan_primary', percent: 100 } ] },
 			ipv6: { failover: [ { interface: 'wan_primary', percent: 100 } ] }
 		},
+		strategy_status: {
+			ipv4: { failover: { exists: true, active_connections: 4 } },
+			ipv6: { failover: { exists: true, active_connections: 1 } }
+		},
 		diagnostics: {
 			warnings: []
 		}
@@ -110,9 +131,41 @@ function defaultCounters() {
 	return {
 		counters: {
 			mwan4_counter_rule_default_rule_v4: { packets: 4, bytes: 512 },
+			mwan4_counter_rule_default_rule_v4_ipv4: { packets: 9, bytes: 2048 },
 			mwan4_counter_strategy_failover: { packets: 4, bytes: 512 },
 			mwan4_counter_iface_wan_primary: { packets: 4, bytes: 512 }
+		},
+		rules: {
+			streaming: {
+				new_connections:    { ipv4: 30, ipv6: 10, total: 40 },
+				active_connections: { ipv4: 2, ipv6: 1, total: 3 }
+			},
+			default_rule_v4: {
+				new_connections:    { ipv4: 9, ipv6: 0, total: 9 },
+				active_connections: { ipv4: 4, ipv6: 0, total: 4 }
+			}
 		}
+	};
+}
+
+function defaultHostHints() {
+	return {
+		'aa:bb:cc:dd:ee:01': { name: 'living-room-tv', ipaddrs: [ '192.168.1.20' ] },
+		'aa:bb:cc:dd:ee:02': { name: 'laptop', ipaddrs: [ '192.168.1.30' ] }
+	};
+}
+
+function defaultPbrPreview() {
+	return {
+		ok: true,
+		applied: false,
+		policies: [
+			{ pbr_section: 'cfg1', name: 'youtube', rule: 'pbr_youtube', action: 'import', reason: '', target: 'wan_backup', strategy: 'wan_backup_first', summary: 'youtube.com -> wan_backup' },
+			{ pbr_section: 'cfg2', name: 'dns trick', rule: '', action: 'skip', reason: 'dns_policy is not supported', target: '', strategy: '', summary: '' }
+		],
+		interfaces: [],
+		strategies: [ 'wan_backup_first' ],
+		warnings: [ 'config include /etc/pbr.d/20-discord-chrome.sh was not imported' ]
 	};
 }
 
@@ -308,6 +361,10 @@ async function renderOverview(page, options) {
 			operatorAccess: !!args.operatorAccess,
 			advancedAccess: !!args.advancedAccess,
 			diagnosticsAccess: !!args.diagnosticsAccess,
+			configWrite: !!args.configWrite,
+			connections: args.connections,
+			hostHints: args.hostHints,
+			pbrPreview: args.pbrPreview,
 			rpcCalls: [],
 			polls: []
 		};
@@ -361,8 +418,8 @@ async function renderOverview(page, options) {
 				if (value == null || value === false)
 					return;
 
-				if (key == 'click') {
-					node.addEventListener('click', value);
+				if (typeof value == 'function') {
+					node.addEventListener(key, value);
 					return;
 				}
 
@@ -433,8 +490,47 @@ async function renderOverview(page, options) {
 				state.uci[conf] = sectionList(conf).filter(function(section) {
 					return section['.name'] != sid;
 				});
+			},
+			move: function(conf, sid1, sid2, after) {
+				let moved = findSection(conf, sid1);
+				let rest = sectionList(conf).filter(function(section) { return section !== moved; });
+				let target = rest.findIndex(function(section) { return section['.name'] == sid2; });
+
+				rest.splice(target + (after ? 1 : 0), 0, moved);
+				rest.forEach(function(section, index) { section['.index'] = index; });
+				state.uci[conf] = rest;
+				return true;
 			}
 		};
+
+		function applyPbrImport() {
+			state.pbrPreview.policies.filter(function(policy) { return policy.action == 'import'; }).forEach(function(policy) {
+				uci.add('mwan4', 'rule', policy.rule);
+				uci.set('mwan4', policy.rule, 'label', policy.name);
+				uci.set('mwan4', policy.rule, 'use_strategy', policy.strategy);
+				uci.move('mwan4', policy.rule, 'default_rule_v4', false);
+			});
+
+			return Object.assign({}, state.pbrPreview, { applied: true });
+		}
+
+
+		function queryConnections(state, params) {
+			let wanted = { rule: params[0], interface: params[1], strategy: params[2], family: params[3], proto: params[4] };
+			let search = String(params[5] || '').toLowerCase();
+			let offset = params[7] || 0;
+			let items = state.connections.items.filter(function(item) {
+				return Object.keys(wanted).every(function(key) { return !wanted[key] || item[key] == wanted[key]; }) &&
+					(!search || JSON.stringify(item).toLowerCase().indexOf(search) >= 0);
+			});
+			let page = items.slice(offset, offset + (params[6] || 200));
+
+			return { ok: true, accounting: state.connections.accounting !== false, total: items.length, truncated: offset + page.length < items.length, items: page };
+		}
+
+		function connectionsRpc(state, params) {
+			return state.connections ? Promise.resolve(queryConnections(state, params)) : Promise.reject(new Error('Method not found'));
+		}
 
 		const rpc = {
 			declare: function(spec) {
@@ -442,6 +538,8 @@ async function renderOverview(page, options) {
 					let params = Array.from(arguments);
 					state.rpcCalls.push({ object: spec.object, method: spec.method, params: params });
 
+					if (spec.object == 'mwan4' && spec.method == 'connections')
+						return connectionsRpc(state, params);
 					if (spec.object == 'mwan4' && spec.method == 'status') {
 						let result = params[0] == 'counters' ? state.counters : state.status;
 						return new Promise(function(resolve) { window.setTimeout(function() { resolve(result); }, state.statusDelay); });
@@ -456,8 +554,14 @@ async function renderOverview(page, options) {
 							}, state.controlDelay);
 						});
 					}
+					if (spec.object == 'luci-rpc' && spec.method == 'getHostHints')
+						return Promise.resolve(state.hostHints);
+					if (spec.object == 'mwan4' && spec.method == 'pbr_import')
+						return Promise.resolve(params[0] ? applyPbrImport() : state.pbrPreview);
 					if (spec.object == 'session' && spec.method == 'access') {
 						let acl = params[1];
+						if (acl == 'luci-app-mwan4')
+							return Promise.resolve(state.configWrite);
 						if (acl == 'luci-app-mwan4-operator')
 							return Promise.resolve(state.operatorAccess);
 						if (acl == 'luci-app-mwan4-advanced')
@@ -504,7 +608,9 @@ async function renderOverview(page, options) {
 
 		const common = new Function('baseclass', 'L', 'E', '_', args.commonSource)(baseclass, L, E, translate);
 		const overviewModule = new Function('baseclass', 'mwan4Common', 'L', 'E', '_', args.overviewModuleSource)(baseclass, common, L, E, translate);
-		const module = new Function('fs', 'poll', 'rpc', 'uci', 'ui', 'view', 'mwan4Common', 'mwan4Overview', 'L', 'E', '_', args.overviewSource)(fs, poll, rpc, uci, ui, view, common, overviewModule, L, E, translate);
+		const rulesModule = new Function('baseclass', 'L', 'E', '_', args.rulesModuleSource)(baseclass, L, E, translate);
+		const connectionsModule = new Function('baseclass', 'rpc', 'mwan4Common', 'L', 'E', '_', args.connectionsModuleSource)(baseclass, rpc, common, L, E, translate);
+		const module = new Function('fs', 'poll', 'rpc', 'uci', 'ui', 'view', 'mwan4Common', 'mwan4Connections', 'mwan4Overview', 'mwan4Rules', 'L', 'E', '_', args.overviewSource)(fs, poll, rpc, uci, ui, view, common, connectionsModule, overviewModule, rulesModule, L, E, translate);
 		const root = document.getElementById('test-root');
 
 		root.replaceChildren(module.render([
@@ -519,7 +625,10 @@ async function renderOverview(page, options) {
 			{ type: 'file' },
 			{ type: 'file' },
 			{ type: 'file' },
-			{ type: 'file' }
+			state.hostHints,
+			state.pbrPreview,
+			state.configWrite,
+			state.connections ? state.connections.items.length : null
 		]));
 
 		window.__mwan4Mock = {
@@ -528,6 +637,7 @@ async function renderOverview(page, options) {
 			runPoll: function() {
 				return Promise.all(state.polls.map(function(fn) { return fn(); }));
 			},
+			setConnections: function(connections) { state.connections = connections; },
 			setCounters: function(counters) { state.counters = counters; },
 			setStatus: function(status) { state.status = status; },
 			setStatusDelay: function(ms) { state.statusDelay = ms; },
@@ -536,7 +646,13 @@ async function renderOverview(page, options) {
 	}, {
 		overviewSource: fs.readFileSync(overviewPath, 'utf8'),
 		overviewModuleSource: fs.readFileSync(overviewModulePath, 'utf8'),
+		connectionsModuleSource: fs.readFileSync(connectionsModulePath, 'utf8'),
+		connections: options.connections === undefined ? defaultConnections() : options.connections,
+		rulesModuleSource: fs.readFileSync(rulesModulePath, 'utf8'),
 		commonSource: fs.readFileSync(commonPath, 'utf8'),
+		hostHints: options.hostHints || defaultHostHints(),
+		pbrPreview: options.pbrPreview || { policies: [] },
+		configWrite: options.configWrite == null ? true : options.configWrite,
 		uci: options.uci || defaultUci(),
 		status: options.status || defaultStatus(),
 		controlResult: options.controlResult === undefined ? { ok: true } : options.controlResult,
@@ -559,6 +675,7 @@ async function renderDiagnostics(page, options) {
 			diagnostics: args.diagnostics,
 			diagnosticsAccess: !!args.diagnosticsAccess,
 			operatorAccess: !!args.operatorAccess,
+			connections: args.connections,
 			rpcCalls: []
 		};
 
@@ -610,8 +727,8 @@ async function renderDiagnostics(page, options) {
 				if (value == null || value === false)
 					return;
 
-				if (key == 'click') {
-					node.addEventListener('click', value);
+				if (typeof value == 'function') {
+					node.addEventListener(key, value);
 					return;
 				}
 
@@ -641,12 +758,32 @@ async function renderDiagnostics(page, options) {
 			url: function() { return '/cgi-bin/luci/' + Array.from(arguments).join('/'); }
 		};
 
+
+		function queryConnections(state, params) {
+			let wanted = { rule: params[0], interface: params[1], strategy: params[2], family: params[3], proto: params[4] };
+			let search = String(params[5] || '').toLowerCase();
+			let offset = params[7] || 0;
+			let items = state.connections.items.filter(function(item) {
+				return Object.keys(wanted).every(function(key) { return !wanted[key] || item[key] == wanted[key]; }) &&
+					(!search || JSON.stringify(item).toLowerCase().indexOf(search) >= 0);
+			});
+			let page = items.slice(offset, offset + (params[6] || 200));
+
+			return { ok: true, accounting: state.connections.accounting !== false, total: items.length, truncated: offset + page.length < items.length, items: page };
+		}
+
+		function connectionsRpc(state, params) {
+			return state.connections ? Promise.resolve(queryConnections(state, params)) : Promise.reject(new Error('Method not found'));
+		}
+
 		const rpc = {
 			declare: function(spec) {
 				return function() {
 					let params = Array.from(arguments);
 					state.rpcCalls.push({ object: spec.object, method: spec.method, params: params });
 
+					if (spec.object == 'mwan4' && spec.method == 'connections')
+						return connectionsRpc(state, params);
 					if (spec.object == 'session' && spec.method == 'access') {
 						let acl = params[1];
 						return Promise.resolve(acl == 'luci-app-mwan4-operator' ? state.operatorAccess : state.diagnosticsAccess);
@@ -696,13 +833,15 @@ async function renderDiagnostics(page, options) {
 
 		const common = new Function('baseclass', 'L', 'E', '_', args.commonSource)(baseclass, L, E, translate);
 		const diagnosticsModule = new Function('baseclass', 'mwan4Common', 'L', 'E', '_', args.diagnosticsModuleSource)(baseclass, common, L, E, translate);
-		const module = new Function('rpc', 'ui', 'view', 'mwan4Common', 'mwan4Diagnostics', 'L', 'E', '_', args.diagnosticsSource)(rpc, ui, view, common, diagnosticsModule, L, E, translate);
+		const connectionsModule = new Function('baseclass', 'rpc', 'mwan4Common', 'L', 'E', '_', args.connectionsModuleSource)(baseclass, rpc, common, L, E, translate);
+		const module = new Function('rpc', 'ui', 'view', 'mwan4Common', 'mwan4Connections', 'mwan4Diagnostics', 'L', 'E', '_', args.diagnosticsSource)(rpc, ui, view, common, connectionsModule, diagnosticsModule, L, E, translate);
 		const root = document.getElementById('test-root');
 
 		root.replaceChildren(module.render([
 			state.diagnosticsAccess,
 			state.operatorAccess,
-			state.diagnostics.summary
+			state.diagnostics.summary,
+			state.connections ? state.connections.items.length : null
 		]));
 
 		window.__mwan4Mock = {
@@ -711,6 +850,8 @@ async function renderDiagnostics(page, options) {
 	}, {
 		diagnosticsSource: fs.readFileSync(diagnosticsPath, 'utf8'),
 		diagnosticsModuleSource: fs.readFileSync(diagnosticsModulePath, 'utf8'),
+		connectionsModuleSource: fs.readFileSync(connectionsModulePath, 'utf8'),
+		connections: options.connections === undefined ? defaultConnections() : options.connections,
 		commonSource: fs.readFileSync(commonPath, 'utf8'),
 		diagnostics: options.diagnostics || defaultDiagnostics(),
 		diagnosticsAccess: options.diagnosticsAccess == null ? true : options.diagnosticsAccess,
@@ -851,8 +992,11 @@ async function renderStatus(page, options) {
 }
 
 module.exports = {
+	defaultConnections,
 	defaultCounters,
 	defaultDiagnostics,
+	defaultHostHints,
+	defaultPbrPreview,
 	defaultStatus,
 	defaultUci,
 	renderDiagnostics,

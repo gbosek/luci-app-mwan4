@@ -4,6 +4,7 @@
 		"read": {
 			"ubus": {
 				"mwan4": [
+					"connections",
 					"status"
 				]
 			}
@@ -29,6 +30,7 @@
 			"ubus": {
 				"mwan4": [
 					"capabilities",
+					"connections",
 					"diagnostics",
 					"status",
 					"validate"
@@ -40,6 +42,11 @@
 			]
 		},
 		"write": {
+			"ubus": {
+				"mwan4": [
+					"pbr_import"
+				]
+			},
 			"uci": [
 				"mwan4",
 				"network"
@@ -66,6 +73,7 @@
 			"ubus": {
 				"mwan4": [
 					"capabilities",
+					"connections",
 					"diagnostics",
 					"status",
 					"validate"
@@ -120,6 +128,7 @@
 			"ubus": {
 				"mwan4": [
 					"capabilities",
+					"connections",
 					"diagnostics"
 				]
 			}
