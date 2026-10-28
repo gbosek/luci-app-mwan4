@@ -12,6 +12,7 @@ LUCI_DEPENDS:=+luci-base +mwan4
 LUCI_DESCRIPTION:=Simple, full-featured LuCI interface for mwan4 status and configuration.
 LUCI_MAINTAINER:=Braulio Bhavamitra <braulio@brauliobo.org>
 LUCI_MINIFY_JS:=0
+LUCI_MINIFY_CSS:=0
 
 include ../../luci.mk
 
