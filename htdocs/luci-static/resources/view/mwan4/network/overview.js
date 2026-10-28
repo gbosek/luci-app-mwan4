@@ -379,10 +379,25 @@ function rules() {
 
 function isGeneratedDefaultRule(rule) {
 	let name = rule && rule['.name'];
-	let dest = rule && rule.dest_ip;
+	if (name != 'default_rule_v4' && name != 'default_rule_v6')
+		return false;
 
-	return name == 'default_rule_v4' || name == 'default_rule_v6' ||
-		((dest == '0.0.0.0/0' || dest == '::/0') && !rule.src_ip && !rule.src_iface && !rule.src_port && !rule.dest_port && !rule.ipset);
+	function values(value) {
+		return (Array.isArray(value) ? value : [ value ]).filter(function(v) {
+			return v != null && String(v).trim() != '';
+		});
+	}
+	// A catch-all destination alone does not make a rule generated. Keep
+	// device/domain/protocol/DSCP rules editable even under a reserved name.
+	if ([ 'src_ip', 'src_mac', 'domain', 'src_iface', 'src_port', 'dest_port', 'ipset', 'dscp' ].some(function(key) {
+		return values(rule[key]).length > 0;
+	}))
+		return false;
+	if (String(rule.proto || 'all').trim().toLowerCase() != 'all')
+		return false;
+	return values(rule.dest_ip).every(function(dest) {
+		return dest == '0.0.0.0/0' || dest == '::/0';
+	});
 }
 
 function setList(conf, sid, opt, values) {
